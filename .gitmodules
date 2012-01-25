@@ -1,0 +1,6 @@
+[submodule "ethtool-snmpd"]
+	path = ethtool-snmpd
+	url = git://github.com/vincentbernat/ethtool-snmpd.git
+[submodule "agentx-c"]
+	path = agentx-c
+	url = git://github.com/vincentbernat/ethtool-snmpd.git

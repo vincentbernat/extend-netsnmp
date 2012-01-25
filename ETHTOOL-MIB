@@ -1,0 +1,116 @@
+-- -*- snmpv2 -*-
+-- ----------------------------------------------------------------------
+-- MIB file for ethtool
+-- ----------------------------------------------------------------------
+--
+-- Currenly, only statistics are available.
+
+ETHTOOL-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    OBJECT-TYPE, MODULE-IDENTITY, enterprises,
+    Counter64
+    	FROM SNMPv2-SMI
+    OBJECT-GROUP, MODULE-COMPLIANCE
+        FROM SNMPv2-CONF
+    TEXTUAL-CONVENTION
+    	FROM SNMPv2-TC
+    ifIndex
+        FROM IF-MIB;
+
+ethtool MODULE-IDENTITY
+    LAST-UPDATED "201101060000Z"
+    ORGANIZATION "The IMS Company"
+    CONTACT-INFO "bernat@luffy.cx"
+    DESCRIPTION
+       "This MIB module describes information gathered through ETHTOOL
+       ioctl for each interface available on the monitored
+       system. Currently, only statistics are available. Information
+       may be redundant with what is available in IF-MIB, RMON-MIB,
+       EtherLike-MIB and some other MIB but they are presented here
+       without any abstraction."
+
+    REVISION "201101060000Z"
+    DESCRIPTION "Initial revision."
+
+    ::= { project 1 }
+
+-- We are hosted under The IMS Company OID.
+imsco			OBJECT IDENTIFIER ::= { enterprises 39178 }
+project			OBJECT IDENTIFIER ::= { imsco 100 }
+
+EthtoolStatString ::= TEXTUAL-CONVENTION
+        DISPLAY-HINT "32a"
+        STATUS       current
+        DESCRIPTION  "Name of statistic"
+        SYNTAX       OCTET STRING (SIZE (1..32))
+
+
+---
+--- ethtoolStatTable
+---
+
+ethtoolStatTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF EthtoolStatEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+	"Statistics from ethtool"
+    ::= { ethtool 1 }
+
+ethtoolStatEntry OBJECT-TYPE
+    SYNTAX EthtoolStatEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+	"Statistic for one interface"
+    INDEX { ifIndex, IMPLIED ethtoolStatName }
+    ::= { ethtoolStatTable 1 }
+
+EthtoolStatEntry ::= SEQUENCE {
+    ethtoolStatName EthtoolStatString,
+    ethtoolStat     Counter64
+}
+
+ethtoolStatName OBJECT-TYPE
+    SYNTAX EthtoolStatString
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+	"Name of the statistic as returned by ETHTOOL ioctl."
+    ::= { ethtoolStatEntry 1 }
+
+ethtoolStat OBJECT-TYPE
+    SYNTAX Counter64
+    MAX-ACCESS read-only
+    STATUS current
+    DESCRIPTION
+	"Value of the statistic as returned by ETHTOOL ioctl."
+    ::= { ethtoolStatEntry 2 }
+
+---
+--- ethtoolConformance
+---
+
+ethtoolConformance OBJECT IDENTIFIER ::= { ethtool 100 }
+
+ethtoolCompliances MODULE-COMPLIANCE
+    STATUS current
+    DESCRIPTION
+	"ethtool compliance statement"
+    MODULE -- this module
+    MANDATORY-GROUPS {
+        ethtoolStatGroup
+    }
+    ::= { ethtoolConformance 1 }
+
+ethtoolStatGroup OBJECT-GROUP
+    OBJECTS {
+       ethtoolStat
+    }
+    STATUS current
+    DESCRIPTION
+	"Conformance groupe for ethtool statistics."
+    ::= { ethtoolConformance 2 }
+
+END
