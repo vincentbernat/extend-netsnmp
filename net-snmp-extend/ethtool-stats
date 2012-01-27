@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Return statistics for the given interface.
+# Usage:
+#    ethtool-stats iface cmd
+# with:
+#    iface: interface name (eth0)
+#    cmd:   either `names` or `values` to return statistic names or statistic values
+
+set -e
+
+iface="${1-eth0}"
+cmd="${2-values}"
+
+(/sbin/ethtool -S "${iface}"  2>&1) | while read name value; do
+    case "${name}" in
+	NIC)
+	    continue
+	    ;;
+	Cannot)
+	    exit 2
+	    ;;
+	*:)
+	    ;;
+	*)
+	    continue
+	    ;;
+    esac
+    case "$cmd" in
+	names)
+	    echo ${name%:}
+	    ;;
+	values)
+	    echo ${value}
+	    ;;
+    esac
+done
+
+exit 0
