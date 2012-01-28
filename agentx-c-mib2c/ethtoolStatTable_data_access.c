@@ -216,7 +216,7 @@ ethtoolStatTable_container_load(netsnmp_container *container)
 
     int skfd;
     struct ifaddrs *ifap;
-    struct ifaddrs *ifa;
+    struct ifaddrs *ifa, *ifaprev;
 
     if ((skfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
         return MFD_RESOURCE_UNAVAILABLE;
@@ -237,6 +237,13 @@ ethtoolStatTable_container_load(netsnmp_container *container)
 	struct ethtool_stats *stats;
 	struct ifreq ifr;
 	unsigned int n_stats, sz_str, sz_stats, i;
+
+        /* We want to process interfaces only once. Check if this one was
+           already processed. */
+        for (ifaprev = ifap;
+             ifaprev && ifaprev != ifa;
+             ifaprev = ifaprev->ifa_next)
+            if (strcmp(ifaprev->ifa_name, ifa->ifa_name) == 0) continue;
 
 	memset(&ifr, 0, sizeof(ifr));
 	strcpy(ifr.ifr_name, ifa->ifa_name);
