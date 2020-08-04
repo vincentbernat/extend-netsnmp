@@ -1,5 +1,3 @@
-#!/usr/bin/python -u
-
 import re
 import os
 import glob
@@ -10,7 +8,7 @@ import snmp_passpersist as snmp
 def update():
     for interface in os.listdir("/sys/class/net"):
         # Get index
-        index = file("/sys/class/net/%s/ifindex" % interface)
+        index = open("/sys/class/net/%s/ifindex" % interface)
         index = int(index.read())
 
         # Call ethtool
@@ -20,6 +18,7 @@ def update():
         except subprocess.CalledProcessError:
             continue
 
+        ethtool = ethtool.decode("ascii")
         for line in ethtool.split("\n"):
             mo = re.match("\s+(\w+): (\d+)", line)
             if not mo: continue
