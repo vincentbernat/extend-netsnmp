@@ -14,7 +14,7 @@ def update():
         # Call ethtool
         try:
             ethtool = subprocess.check_output(["ethtool", "-S", interface],
-                                              stderr=subprocess.STDOUT)
+                                              stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError:
             continue
 
